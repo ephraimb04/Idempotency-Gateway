@@ -264,4 +264,5 @@ idempotency-gateway/
 
 - `.env` is excluded from the repository for security — use `.env.example` as a template
 - Keys expire automatically after 24 hours
+- Work was done in the railway variant and files were committed to the main 
 - For any issues feel free to open an [issue on GitHub](https://github.com/ephraimb04/idempotency-gateway/issues)
