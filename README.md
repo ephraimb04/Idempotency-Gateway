@@ -1,6 +1,9 @@
 # FinSafe Idempotency Gateway
 
+### Architecture 
+
 ![Flowchart](./flowchart.png)
+<img width="938" height="2009" alt="image" src="https://github.com/user-attachments/assets/b23deac3-79d7-4b03-9437-143ac2fefe24" />
 
 A backend middleware service built to solve a real problem — when e-commerce clients retry failed payment requests, customers get charged twice. This gateway ensures every payment is processed **exactly once**, no matter how many times the request is sent.
 
@@ -10,13 +13,13 @@ A backend middleware service built to solve a real problem — when e-commerce c
 
 ## 🚀 Live API
 
-[Test the Live API](https://YOUR-RAILWAY-URL.up.railway.app)
+[Test the Live API](https://idempotency-gateway-production-87f3.up.railway.app)
 
 *Note: The API may take a few seconds to respond on the first request as the server spins up from idle.*
 
 ```
 Quick test endpoint:
-GET https://YOUR-RAILWAY-URL.up.railway.app/
+GET https://idempotency-gateway-production-87f3.up.railway.app/
 ```
 
 ---
@@ -45,7 +48,7 @@ When a client sends a payment request, the gateway checks Redis for the `Idempot
 
 No setup needed. Just open Postman and send requests to:
 ```
-https://YOUR-RAILWAY-URL.up.railway.app/process-payment
+https://idempotency-gateway-production-87f3.up.railway.app/process-payment
 ```
 
 ### Option 2 — Run Locally
@@ -108,7 +111,7 @@ Server runs at `http://127.0.0.1:8000`
 
 ```
 Local:   http://127.0.0.1:8000
-Live:    https://YOUR-RAILWAY-URL.up.railway.app
+Live:    https://idempotency-gateway-production-87f3.up.railway.app
 ```
 
 ---
