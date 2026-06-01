@@ -12,13 +12,13 @@ from fastapi.responses import JSONResponse
 from mangum import Mangum
 from pydantic import BaseModel
 
-# ── Load environment variables from .env ──────────────────────────────────────
+# Load environment variables from .env 
 load_dotenv()
 
-# ── FastAPI app ────────────────────────────────────────────────────────────────
+#  FastAPI app 
 app = FastAPI(title="FinSafe Idempotency Gateway")
 
-# ── Redis connection (supports Railway's password) ────────────────────────────
+#  Redis connection (supports Railway's password)
 r = redis.Redis(
     host=os.getenv("REDIS_HOST", "localhost"),
     port=int(os.getenv("REDIS_PORT", 6379)),
@@ -26,7 +26,7 @@ r = redis.Redis(
     decode_responses=True,
 )
 
-# ── Request body model ─────────────────────────────────────────────────────────
+#  Request body model
 
 
 class PaymentRequest(BaseModel):
@@ -34,26 +34,26 @@ class PaymentRequest(BaseModel):
     currency: str
 
 
-# ── Helper: hash the request body so we can detect conflicts ──────────────────
+#  Helper: hash the request body so we can detect conflicts 
 def hash_payload(payload: dict) -> str:
     serialized = json.dumps(payload, sort_keys=True)
     return hashlib.sha256(serialized.encode()).hexdigest()
 
 
-# ── Helper: auto-generate a key if the client forgot to send one ──────────────
+# Helper: auto-generate a key if the client forgot to send one 
 def generate_fingerprint(payload: dict) -> str:
     window = datetime.utcnow().strftime("%Y-%m-%dT%H:%M")  # 1-minute window
     raw = json.dumps(payload, sort_keys=True) + window
     return "auto_" + hashlib.sha256(raw.encode()).hexdigest()[:16]
 
 
-# ── Root endpoint (health check) ──────────────────────────────────────────────
+# Root endpoint (health check) 
 @app.get("/")
 def root():
     return {"status": "FinSafe Idempotency Gateway is running"}
 
 
-# ── Main payment endpoint ──────────────────────────────────────────────────────
+# Main payment endpoint 
 @app.post("/process-payment")
 async def process_payment(
     payment: PaymentRequest,
@@ -62,7 +62,7 @@ async def process_payment(
     payload_dict = payment.model_dump()
     payload_hash = hash_payload(payload_dict)
 
-    # ── If no key supplied, auto-generate one from the payload ────────────────
+    # If no key supplied, auto-generate one from the payload 
     if not idempotency_key:
         idempotency_key = generate_fingerprint(payload_dict)
 
@@ -72,10 +72,10 @@ async def process_payment(
     hash_key = f"{idempotency_key}:hash"
     retry_key = f"{idempotency_key}:retries"
 
-    # ── Check if this key already exists ──────────────────────────────────────
+    # Check if this key already exists 
     existing_status = r.get(status_key)
 
-    # ── STORY 3: Same key, different payload → 409 Conflict ───────────────────
+    # STORY 3: Same key, different payload 
     if existing_status:
         stored_hash = r.get(hash_key)
         if stored_hash and stored_hash != payload_hash:
@@ -84,7 +84,7 @@ async def process_payment(
                 detail="Idempotency key already used for a different request body.",
             )
 
-    # ── BONUS: In-flight check — wait for Request A to finish ─────────────────
+    # BONUS: In-flight check — wait for Request A to finish 
     if existing_status == "processing":
         # Poll every 200ms until done (max 10 seconds)
         for _ in range(50):
@@ -94,7 +94,7 @@ async def process_payment(
                 break
         # Fall through to return the stored response below
 
-    # ── STORY 2: Duplicate request — return stored response ───────────────────
+    # STORY 2: Duplicate request — return stored response 
     if r.get(status_key) == "done":
         stored_response = r.get(response_key)
         retry_count = r.incr(retry_key)  # Developer's Choice: count retries
@@ -107,7 +107,7 @@ async def process_payment(
             },
         )
 
-    # ── STORY 1: Brand new request — process the payment ─────────────────────
+    # STORY 1: Brand new request — process the payment 
 
     # Mark as in-flight so concurrent duplicates wait
     r.set(status_key,   "processing", ex=86400)
@@ -137,10 +137,10 @@ async def process_payment(
     )
 
 
-# ── AWS Lambda handler (for future AWS deployment) ────────────────────────────
+# AWS Lambda handler (for future AWS deployment) 
 handler = Mangum(app)
 
 
-# ── Run the server locally ────────────────────────────────────────────────────
+# Run the server locally 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
