@@ -2,34 +2,23 @@
 
 A middleware service that ensures payment requests are processed **exactly once**, preventing double charges caused by network timeouts and client retries.
 
-## Live Demo
-
-> API is live at: `https://YOUR-RAILWAY-URL.up.railway.app`  
-> *(Replace this with your actual Railway URL)*
-
-Test it instantly in Postman — no setup needed.
-
----
-
 ## 1. Architecture Diagram
 
 ![Idempotency Gateway Flowchart](flowchart.png)
 
 ### How the Flow Works
 
-| Step | What Happens |
-|------|-------------|
-| 1 | Client sends `POST /process-payment` with an `Idempotency-Key` header |
-| 2 | Gateway receives the request |
-| 3 | If no key provided → auto-generate one from payload hash |
-| 4 | Check Redis — does this key already exist? |
-| 5 | If key exists + same payload → return stored response (no charge) |
-| 5 | If key exists + different payload → return `409 Conflict` |
-| 5 | If key is new → forward to payment service |
-| 6 | Save result to Redis with 24hr expiry |
-| 7 | Return payment response to client |
+### Step How it works 
 
----
+ 1.  Client sends `POST /process-payment` with an `Idempotency-Key` header 
+ 2  Gateway receives the request 
+ 3  If no key provided → auto-generate one from payload hash 
+ 4  Check Redis — does this key already exist? 
+ 5  If key exists + same payload → return stored response (no charge) 
+ 5  If key exists + different payload → return `409 Conflict` 
+ 5  If key is new → forward to payment service 
+ 6  Save result to Redis with 24hr expiry 
+ 7  Return payment response to client 
 
 ## 2. Setup Instructions
 
@@ -42,9 +31,8 @@ Test it instantly in Postman — no setup needed.
 ### Option 1 — Use the Live API (No Setup Needed)
 
 The API is already deployed and running at:
-```
-https://YOUR-RAILWAY-URL.up.railway.app
-```
+
+https://your-app.up.railway.app/process-payment
 
 Just open Postman and send requests directly. No installation required.
 
@@ -98,32 +86,6 @@ uvicorn main:app --reload
 
 Server runs at: `http://127.0.0.1:8000`
 
-### Option 3 — Deploy to Railway
-
-1. Fork this repository
-2. Create a new project on [railway.app](https://railway.app)
-3. Click **Deploy from GitHub repo** and select this repo
-4. Add a Redis database service
-5. Add these environment variables to your app service:
-```
-REDIS_HOST=your-redis-host
-REDIS_PORT=your-redis-port
-REDIS_PASSWORD=your-redis-password
-```
-6. Go to Settings → Networking → Generate Domain
-
-### Option 4 — Deploy to AWS Lambda
-
-This app is pre-configured for AWS Lambda via Mangum.
-
-```bash
-pip install aws-sam-cli
-aws configure
-sam build
-sam deploy --guided
-```
-
----
 
 ## 3. API Documentation
 
@@ -143,9 +105,8 @@ Live:   https://YOUR-RAILWAY-URL.up.railway.app
 Health check to confirm the service is running.
 
 **Request:**
-```
+
 GET /
-```
 
 **Response:**
 ```json
@@ -163,14 +124,14 @@ Process a payment with full idempotency protection.
 **Headers:**
 
 | Header | Required | Description |
-|--------|----------|-------------|
+
 | `Idempotency-Key` | No | Unique key per payment attempt. Auto-generated if missing. |
 | `Content-Type` | Yes | `application/json` |
 
 **Request Body:**
 
 | Field | Type | Required | Description |
-|-------|------|----------|-------------|
+
 | `amount` | float | Yes | Payment amount |
 | `currency` | string | Yes | Currency code e.g. GHS, USD |
 
@@ -235,7 +196,7 @@ Status: 409 Conflict
 
 #### Bonus — No Key Provided (Auto-Generated)
 ```
-Status:       201 Created
+Status:       Payment service response created 
 X-Cache-Hit:  false
 ```
 ```json
@@ -257,7 +218,7 @@ X-Cache-Hit:  false
 2. URL: `https://YOUR-RAILWAY-URL.up.railway.app/process-payment`
 3. Headers: `Idempotency-Key: pay_test_001`
 4. Body (raw JSON): `{ "amount": 50, "currency": "GHS" }`
-5. Click Send → expect `201 Created`
+5. Click Send → expect `Payment service created`
 
 **Test 2 — Duplicate:**
 1. Send the exact same request again
@@ -274,7 +235,7 @@ X-Cache-Hit:  false
 
 ### Why FastAPI?
 
-FastAPI was chosen over Flask because:
+FastAPI was chosen because:
 - **Async support** — handles concurrent duplicate requests without blocking threads
 - **Pydantic validation** — automatically validates and rejects malformed request bodies
 - **Auto docs** — visit `/docs` for a live interactive API explorer
