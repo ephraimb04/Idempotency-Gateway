@@ -2,12 +2,9 @@
 
 ### Architecture 
 
-![Flowchart](./flowchart.png)
 <img width="938" height="2009" alt="image" src="https://github.com/user-attachments/assets/b23deac3-79d7-4b03-9437-143ac2fefe24" />
 
 A backend middleware service built to solve a real problem — when e-commerce clients retry failed payment requests, customers get charged twice. This gateway ensures every payment is processed **exactly once**, no matter how many times the request is sent.
-
-> ⚠️ This project is part of the AmalitechGlobal Backend Engineering Challenge and is actively being developed.
 
 ---
 
