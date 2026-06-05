@@ -2,7 +2,8 @@
 
 ### Architecture 
 
-<img width="1332" height="4935" alt="image" src="https://github.com/user-attachments/assets/93fb5a5d-cfa9-4c8a-96c2-54f344a10d42" />
+<img width="1877" height="4018" alt="flow_chart" src="https://github.com/user-attachments/assets/822270ce-655f-474f-a628-9a9c6fa6ed1f" />
+
 
 
 A backend middleware service built to solve a real problem — when e-commerce clients retry failed payment requests, customers get charged twice. This gateway ensures every payment is processed **exactly once**, no matter how many times the request is sent.
