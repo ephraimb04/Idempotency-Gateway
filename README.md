@@ -215,7 +215,7 @@ The whole solution depends on checking a key atomically — if two requests arri
 I didn't want to touch FinSafe's existing payment service at all. Sitting in front of it as a proxy means the original code is never at risk, and the same middleware could protect other endpoints in the future without any changes.
 
 **Why Railway over AWS?**
-Honestly, practicality. Railway doesn't require a credit card, has a built-in Redis service, and auto-deploys on every push. The app is also pre-configured with Mangum so when an AWS account is available, migration is straightforward.
+Practicality, Railway doesn't require a credit card, has a built-in Redis service, and auto-deploys on every push. The app is also pre-configured with Mangum so when an AWS account is available, migration is straightforward.
 
 ---
 
